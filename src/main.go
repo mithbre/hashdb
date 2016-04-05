@@ -15,13 +15,12 @@ func traverseDir(tree map[string] []os.FileInfo, path string) error {
             // filepath.SkipDir
             path = filepath.Clean(path)
             tree[path] = make([]os.FileInfo, 0)
-            return nil
         } else {
             path, _ = filepath.Split(path)
             path = filepath.Clean(path)
             tree[path] = append(tree[path], meta)
-            return nil
         }
+        return nil
     }
 
     err := filepath.Walk(path, walk)
