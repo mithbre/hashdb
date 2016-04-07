@@ -16,7 +16,7 @@ func DBInit(path string) (*sql.DB, error) {
     }
 
     create := `
-    CREATE TABLE tblFile(
+    CREATE TABLE IF NOT EXISTS tblFile(
     id_file     INTEGER PRIMARY KEY NOT NULL,
     filename    TEXT NOT NULL,
     sha1        BLOB,
@@ -27,7 +27,7 @@ func DBInit(path string) (*sql.DB, error) {
     path        INTEGER REFERENCES tblPath(id_path) ON UPDATE CASCADE
     );
     
-    CREATE TABLE tblPath(
+    CREATE TABLE IF NOT EXISTS tblPath(
     id_path     INTEGER PRIMARY KEY NOT NULL,
     path        TEXT NOT NULL
     );
