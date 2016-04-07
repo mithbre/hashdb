@@ -1,10 +1,15 @@
 package main
 
 import (
-    //"fmt"
+    "fmt"
     "os"
     "path/filepath"
 )
+
+func usage() {
+    fmt.Printf("Add a path to be tracked.\n")
+    fmt.Printf("    $ hashdb padd path\n")
+}
 
 
 func traverseDir(tree map[string] []os.FileInfo, path string) error {
