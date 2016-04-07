@@ -31,10 +31,9 @@ func traverseDir(tree map[string] []os.FileInfo, path string) error {
 }
 
 
-func main() {
-    // TODO: parse arguments
+func pathAdd(path string) {
     dirMap := make(map[string] []os.FileInfo)
-    walkDir := filepath.Clean("../test")
+    walkDir := filepath.Clean(path)
 
     err := traverseDir(dirMap, walkDir)
     if err != nil {
@@ -46,5 +45,20 @@ func main() {
         os.Exit(1)
     }
 
-    //db, err = DBAppend(db, dirMap)
+}
+
+
+func main() {
+    if len(os.Args) < 2 {
+        usage()
+        return
+    }
+
+    args := os.Args[1:]
+
+    if args[0] == "padd" {
+        pathAdd(args[1])
+    } else {
+        usage()
+    }
 }
