@@ -9,9 +9,9 @@ import (
 
 
 func DBInit(path string) (*sql.DB, error) {
-    os.Remove(path)
     db, err := sql.Open("sqlite3", path)
     if err != nil {
+        log.Println(err)
         os.Exit(1)
     }
 
@@ -35,8 +35,7 @@ func DBInit(path string) (*sql.DB, error) {
 
     _, err = db.Exec(create)
     if err != nil {
-        log.Printf("%q: %s\n", err, create)
-        os.Exit(1)
+        log.Printf("%q\n", err)
     }
     return db, nil
 }
