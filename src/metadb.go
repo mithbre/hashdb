@@ -41,6 +41,50 @@ func DBInit(path string) (*sql.DB, error) {
 }
 
 
-//func DBAppend(db *sql.DB, dirMap[string] []os.FileInfo) (*sql.DB, error) {
+func InsPath(db *sql.DB, path string) (*sql.DB, int64, error) {
+    /* Inserts path, and returns row ID */
+    var row string
+    var id int64
 
-//}
+    // id is used in lieu of row (int vs str)
+    err := db.QueryRow("SELECT id_path FROM tblPath WHERE path = ?",
+            path).Scan(&row)
+
+    switch {
+    case err == sql.ErrNoRows:
+        log.Printf("PATH INSERT: %s\n", path)
+        insert, _ := db.Prepare("INSERT INTO tblPath(path) VALUES(?)")
+        res, _ := insert.Exec(path)
+        id, _ = res.LastInsertId()
+
+    case err != nil:
+        log.Printf("%s\n", err)
+        os.Exit(3)
+
+    default:
+        log.Printf("Path Exists: %s\n", path)
+    }
+
+    return db, id, nil
+}
+
+
+func DBAppend(db *sql.DB, path int64, values []os.FileInfo) (*sql.DB, error) {
+    /* Inserts Name, Size, UnixTime, PathID */
+    insFile, err := db.Prepare(`INSERT INTO tblFile(filename, leng, modtime,
+            path) VALUES(?, ?, ?, ?)`)
+    if err != nil {
+        log.Println(err)
+        os.Exit(5)
+    }
+
+    for _, item := range values {
+        _, err := insFile.Exec(item.Name(), item.Size(),
+                item.ModTime().Unix(), path)
+        if err != nil {
+            log.Printf("%s", err)
+            os.Exit(1)
+        }
+    }
+    return db, nil
+}

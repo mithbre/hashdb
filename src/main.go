@@ -45,11 +45,18 @@ func pathAdd(path string) {
         os.Exit(1)
     }
 
-    _, err = DBInit("../test.db")
+    db, err := DBInit("../test.db")
     if err != nil {
         os.Exit(1)
     }
 
+    for path, values := range dirMap {
+        db, pathId, _ := InsPath(db, path)
+        db, err = DBAppend(db, pathId, values)
+        if db == nil {
+            os.Exit(1)
+        }
+    }
 }
 
 
