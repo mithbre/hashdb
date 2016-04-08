@@ -3,6 +3,7 @@ package main
 import (
     "os"
     "log"
+    "strconv"
     "database/sql"
     _ "github.com/mattn/go-sqlite3"
 )
@@ -63,6 +64,7 @@ func InsPath(db *sql.DB, path string) (*sql.DB, int64, error) {
 
     default:
         log.Printf("Path Exists: %s\n", path)
+        id, err = strconv.ParseInt(row, 10, 64)
     }
 
     return db, id, nil
