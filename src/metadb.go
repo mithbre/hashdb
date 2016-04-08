@@ -25,7 +25,8 @@ func DBInit(path string) (*sql.DB, error) {
     leng        INTEGER NOT NULL,
     modtime     INTEGER NOT NULL,
     ext         TEXT,
-    path        INTEGER REFERENCES tblPath(id_path) ON UPDATE CASCADE
+    path        INTEGER REFERENCES tblPath(id_path) ON UPDATE CASCADE,
+    UNIQUE (filename, path) ON CONFLICT IGNORE
     );
     
     CREATE TABLE IF NOT EXISTS tblPath(
