@@ -3,7 +3,9 @@ package main
 import (
     "os"
     "log"
+    "path/filepath"
     "strconv"
+    "strings"
     "database/sql"
     _ "github.com/mattn/go-sqlite3"
 )
@@ -75,15 +77,19 @@ func InsPath(db *sql.DB, path string) (*sql.DB, int64, error) {
 func DBAppend(db *sql.DB, path int64, values []os.FileInfo) (*sql.DB, error) {
     /* Inserts Name, Size, UnixTime, PathID */
     insFile, err := db.Prepare(`INSERT INTO tblFile(filename, leng, modtime,
-            path) VALUES(?, ?, ?, ?)`)
+            path, ext) VALUES(?, ?, ?, ?, ?)`)
     if err != nil {
         log.Println(err)
         os.Exit(5)
     }
 
     for _, item := range values {
+        ext := filepath.Ext(item.Name())
+        if len(ext) > 1 {
+            ext = strings.ToLower(ext)[1:len(ext)]
+        }
         _, err := insFile.Exec(item.Name(), item.Size(),
-                item.ModTime().Unix(), path)
+                item.ModTime().Unix(), path, ext)
         if err != nil {
             log.Printf("%s", err)
             os.Exit(1)
