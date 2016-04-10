@@ -4,11 +4,45 @@ import (
     "fmt"
     "os"
     "path/filepath"
+    "crypto/sha1"
+    "crypto/sha256"
+    "bufio"
+    "io"
 )
 
 func usage() {
     fmt.Printf("Add a path to be tracked.\n")
     fmt.Printf("    $ hashdb padd path\n")
+}
+
+
+func checksum(path string) ([]byte, []byte) {
+    buf := make([]byte, 1024*1024*50)
+    s1 := sha1.New()
+    s2 := sha256.New()
+
+    fi, err := os.Open(path)
+    defer fi.Close()
+    if err != nil {
+        os.Exit(1)
+    }
+
+    fiRead := bufio.NewReader(fi)
+
+    for {
+        bytes, err := fiRead.Read(buf)
+
+        if err == io.EOF {
+            break
+        } else if err != nil {
+            os.Exit(1)
+        }
+
+        s1.Write(buf[0:bytes])
+        s2.Write(buf[0:bytes])
+    }
+
+    return s1.Sum(nil), s2.Sum(nil)
 }
 
 
