@@ -8,6 +8,7 @@ import (
     "crypto/sha256"
     "bufio"
     "io"
+    "strings"
 )
 
 func usage() {
@@ -86,9 +87,16 @@ func pathAdd(path string) {
 
     for path, values := range dirMap {
         db, pathId, _ := InsPath(db, path)
-        db, err = DBAppend(db, pathId, values)
-        if db == nil {
-            os.Exit(1)
+        for _, item := range values {
+            ext := filepath.Ext(item.Name())
+            if len(ext) > 1 {
+                ext = strings.ToLower(ext)[1:len(ext)]
+            }
+            db, err = DBAppend(db, pathId, item, ext)
+
+            if db == nil {
+                os.Exit(1)
+            }
         }
     }
 }
