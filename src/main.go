@@ -92,7 +92,8 @@ func pathAdd(path string) {
             if len(ext) > 1 {
                 ext = strings.ToLower(ext)[1:len(ext)]
             }
-            db, err = DBAppend(db, pathId, item, ext)
+            sha1, sha2 := checksum(filepath.Join(path, item.Name()))
+            db, err = DBAppend(db, pathId, item, ext, sha1, sha2)
 
             if db == nil {
                 os.Exit(1)

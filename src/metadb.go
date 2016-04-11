@@ -72,18 +72,18 @@ func InsPath(db *sql.DB, path string) (*sql.DB, int64, error) {
 }
 
 
-func DBAppend(db *sql.DB, path int64, item os.FileInfo, ext string)
-    (*sql.DB, error) {
+func DBAppend(db *sql.DB, path int64, item os.FileInfo, ext string,
+    sha1 []byte, sha2 []byte) (*sql.DB, error) {
     /* Inserts Name, Size, UnixTime, PathID */
     insFile, err := db.Prepare(`INSERT INTO tblFile(filename, leng, modtime,
-            path, ext) VALUES(?, ?, ?, ?, ?)`)
+            path, ext, sha1, sha256) VALUES(?, ?, ?, ?, ?, ?, ?)`)
     if err != nil {
         log.Println(err)
         os.Exit(5)
     }
 
     _, err = insFile.Exec(item.Name(), item.Size(),
-            item.ModTime().Unix(), path, ext)
+            item.ModTime().Unix(), path, ext, sha1, sha2)
     if err != nil {
         log.Printf("%s", err)
         os.Exit(1)
