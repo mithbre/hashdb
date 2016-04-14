@@ -17,8 +17,7 @@ func usage() {
 }
 
 
-func checksum(path string) ([]byte, []byte) {
-    buf := make([]byte, 1024*1024*50)
+func checksum(path string, buf []byte) ([]byte, []byte) {
     s1 := sha1.New()
     s2 := sha256.New()
 
@@ -85,6 +84,7 @@ func pathAdd(path string) {
         os.Exit(1)
     }
 
+    buf := make([]byte, 1024*1024*50)
     for path, values := range dirMap {
         db, pathId, _ := InsPath(db, path)
         for _, item := range values {
@@ -92,7 +92,7 @@ func pathAdd(path string) {
             if len(ext) > 1 {
                 ext = strings.ToLower(ext)[1:len(ext)]
             }
-            sha1, sha2 := checksum(filepath.Join(path, item.Name()))
+            sha1, sha2 := checksum(filepath.Join(path, item.Name()), buf)
             db, err = DBAppend(db, pathId, item, ext, sha1, sha2)
 
             if db == nil {
