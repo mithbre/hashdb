@@ -89,7 +89,10 @@ func pathAdd(path string) {
         db, pathId, _ := InsPath(db, path)
         for _, item := range values {
             ext := filepath.Ext(item.Name())
-            if len(ext) > 1 {
+            if len(ext) == len(item.Name()) {
+                // Starts with a '.'
+                ext = ""
+            } else if len(ext) > 1 {
                 ext = strings.ToLower(ext)[1:len(ext)]
             }
             sha1, sha2 := checksum(filepath.Join(path, item.Name()), buf)
