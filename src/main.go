@@ -114,9 +114,12 @@ func main() {
 
     args := os.Args[1:]
 
-    if args[0] == "padd" {
+    switch args[0] {
+    case "add":
         pathAdd(args[1])
-    } else {
+    case "query":
+        queryMain(args[1:])
+    default:
         usage()
     }
 }
