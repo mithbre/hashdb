@@ -119,6 +119,8 @@ func main() {
         pathAdd(args[1])
     case "query":
         queryMain(args[1:])
+    case "dupe":
+        dupeMain(args[1:])
     default:
         usage()
     }
