@@ -48,13 +48,6 @@ func queryMain(args []string) {
         qsha1(db, args[1])
     case "sha256":
         fmt.Printf("Query sha256: Not Implemented\n")
-    case "name":
-        fmt.Printf("Query name: Not Implemented\n")
-    case "path":
-        fmt.Printf("Query path: Not Implemented\n")
-    case "size":
-        // size {+, -} int{"", "K", "M", "G", "T"}
-        fmt.Printf("Query size: Not Implemented\n")
     default:
         os.Exit(1)
     }

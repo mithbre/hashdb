@@ -56,17 +56,3 @@ func SelectDupes() {
     }
 }
 
-
-func dupeMain(args []string) {
-    db, err := DBInit("../test.db")
-    if err != nil {
-        os.Exit(1)
-    }
-
-    switch args[0] {
-    case "u", "untracked":
-        fmt.Printf("Untracked mode: Not Implemented\n")
-    default:
-        trackedFileDupe(db, args[0], args[1])
-    }
-}

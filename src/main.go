@@ -109,8 +109,6 @@ func main() {
     switch args[0] {
     case "add":
         pathAdd(args[1])
-    case "query":
-        queryMain(args[1:])
     case "dupe":
         SelectDupes()
     case "rm":
