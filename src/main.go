@@ -115,6 +115,8 @@ func main() {
         SelectDupes()
     case "rm":
         RmFile(args[1])
+    case "banish":
+        Banish(args[1:])
     default:
         usage()
     }
