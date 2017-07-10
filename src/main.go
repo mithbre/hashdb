@@ -47,7 +47,6 @@ func checksum(path string, buf []byte) ([]byte, []byte) {
 
 func traverseDir(tree map[string] []os.FileInfo, path string) error {
     walk := func(path string, meta os.FileInfo, err error) error {
-        path, _ = filepath.Abs(path)
 
         if meta.IsDir() {
             // filepath.SkipDir
@@ -61,6 +60,7 @@ func traverseDir(tree map[string] []os.FileInfo, path string) error {
         return nil
     }
 
+    path, _ = filepath.Abs(path)
     err := filepath.Walk(path, walk)
     if err != nil {
         os.Exit(1)
