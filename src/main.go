@@ -113,6 +113,8 @@ func main() {
         queryMain(args[1:])
     case "dupe":
         SelectDupes()
+    case "rm":
+        RmFile(args[1])
     default:
         usage()
     }

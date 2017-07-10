@@ -103,3 +103,45 @@ func DBAppend(db *sql.DB, path int64, item os.FileInfo,
     }
     return db, nil
 }
+
+func RmFile(id string) (*sql.DB, error) {
+    /* Removes specified row from tblFile */
+    db, err := DBInit("test.db")
+    if err != nil {
+        log.Println(err)
+        os.Exit(1)
+    }
+
+    // Move row information to a temporary table
+    mvRow, err := db.Prepare(`
+        INSERT INTO tblDeleted(filename,sha1,sha256,leng,path)
+        SELECT filename, sha1, sha256, leng, path
+        FROM tblFile
+        WHERE tblFile.id_file = ?;`)
+    if err != nil {
+        log.Println(err)
+        os.Exit(5)
+    }
+
+    // Delete the row from tblFile
+    rmFile, err := db.Prepare(`
+        DELETE FROM tblFile
+        WHERE id_file = ?`)
+    if err != nil {
+        log.Println(err)
+        os.Exit(5)
+    }
+
+    _, err = mvRow.Exec(id)
+    if err != nil {
+        log.Println(err)
+        os.Exit(6)
+    }
+    _, err = rmFile.Exec(id)
+    if err != nil {
+        log.Println(err)
+        os.Exit(6)
+    }
+
+    return db, nil
+}
