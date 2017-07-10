@@ -24,7 +24,6 @@ func DBInit(path string) (*sql.DB, error) {
     sha256      BLOB,
     leng        INTEGER NOT NULL,
     modtime     INTEGER NOT NULL,
-    ext         TEXT,
     path        INTEGER REFERENCES tblPath(id_path) ON UPDATE CASCADE,
     UNIQUE (filename, path) ON CONFLICT IGNORE
     );
@@ -71,19 +70,19 @@ func InsPath(db *sql.DB, path string) (*sql.DB, int64, error) {
     return db, id, nil
 }
 
-
-func DBAppend(db *sql.DB, path int64, item os.FileInfo, ext string,
+func DBAppend(db *sql.DB, path int64, item os.FileInfo,
     sha1 []byte, sha2 []byte) (*sql.DB, error) {
     /* Inserts Name, Size, UnixTime, PathID */
-    insFile, err := db.Prepare(`INSERT INTO tblFile(filename, leng, modtime,
-            path, ext, sha1, sha256) VALUES(?, ?, ?, ?, ?, ?, ?)`)
+    insFile, err := db.Prepare(`
+        INSERT INTO tblFile(filename, leng, path, modtime, sha1, sha256)
+        VALUES(?, ?, ?, ?, ?, ?)`)
     if err != nil {
         log.Println(err)
         os.Exit(5)
     }
 
     _, err = insFile.Exec(item.Name(), item.Size(),
-            item.ModTime().Unix(), path, ext, sha1, sha2)
+        path, item.ModTime().Unix(), sha1, sha2)
     if err != nil {
         log.Printf("%s", err)
         os.Exit(1)

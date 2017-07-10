@@ -8,7 +8,6 @@ import (
     "crypto/sha256"
     "bufio"
     "io"
-    "strings"
 )
 
 func usage() {
@@ -88,15 +87,8 @@ func pathAdd(path string) {
     for path, values := range dirMap {
         db, pathId, _ := InsPath(db, path)
         for _, item := range values {
-            ext := filepath.Ext(item.Name())
-            if len(ext) == len(item.Name()) {
-                // Starts with a '.'
-                ext = ""
-            } else if len(ext) > 1 {
-                ext = strings.ToLower(ext)[1:len(ext)]
-            }
             sha1, sha2 := checksum(filepath.Join(path, item.Name()), buf)
-            db, err = DBAppend(db, pathId, item, ext, sha1, sha2)
+            db, err = DBAppend(db, pathId, item, sha1, sha2)
 
             if db == nil {
                 os.Exit(1)
@@ -120,7 +112,7 @@ func main() {
     case "query":
         queryMain(args[1:])
     case "dupe":
-        dupeMain(args[1:])
+        SelectDupes()
     default:
         usage()
     }
