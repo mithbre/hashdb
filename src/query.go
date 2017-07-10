@@ -1,10 +1,10 @@
 package main
 
 import (
+    "database/sql"
+    "encoding/hex"
     "fmt"
     "os"
-    "encoding/hex"
-    "database/sql"
     _ "github.com/mattn/go-sqlite3"
 )
 

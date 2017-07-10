@@ -1,13 +1,12 @@
 package main
 
 import (
-    "os"
-    "log"
-    "strconv"
     "database/sql"
+    "log"
+    "os"
+    "strconv"
     _ "github.com/mattn/go-sqlite3"
 )
-
 
 func DBInit(path string) (*sql.DB, error) {
     db, err := sql.Open("sqlite3", path)
@@ -41,7 +40,6 @@ func DBInit(path string) (*sql.DB, error) {
     return db, nil
 }
 
-
 func InsPath(db *sql.DB, path string) (*sql.DB, int64, error) {
     /* Inserts path, and returns row ID */
     var row string
@@ -49,7 +47,7 @@ func InsPath(db *sql.DB, path string) (*sql.DB, int64, error) {
 
     // id is used in lieu of row (int vs str)
     err := db.QueryRow("SELECT id_path FROM tblPath WHERE path = ?",
-            path).Scan(&row)
+        path).Scan(&row)
 
     switch {
     case err == sql.ErrNoRows:

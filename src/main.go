@@ -1,13 +1,13 @@
 package main
 
 import (
-    "fmt"
-    "os"
-    "path/filepath"
+    "bufio"
     "crypto/sha1"
     "crypto/sha256"
-    "bufio"
+    "fmt"
     "io"
+    "os"
+    "path/filepath"
 )
 
 func usage() {
