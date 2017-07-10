@@ -31,6 +31,22 @@ func DBInit(path string) (*sql.DB, error) {
     id_path     INTEGER PRIMARY KEY NOT NULL,
     path        TEXT NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS tblBanish(
+    sha1    BLOB,
+    sha256  BLOB,
+    UNIQUE (sha1, sha256) ON CONFLICT IGNORE
+    );
+
+    CREATE TABLE IF NOT EXISTS tblDeleted(
+    id_file     INTEGER PRIMARY KEY NOT NULL,
+    filename    TEXT NOT NULL,
+    sha1        BLOB,
+    sha256      BLOB,
+    leng        INTEGER NOT NULL,
+    path        INTEGER REFERENCES tblPath(id_path) ON UPDATE CASCADE,
+    UNIQUE (filename, path) ON CONFLICT IGNORE
+    )
     `
 
     _, err = db.Exec(create)
