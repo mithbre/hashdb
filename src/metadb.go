@@ -29,7 +29,8 @@ func DBInit(path string) (*sql.DB, error) {
     
     CREATE TABLE IF NOT EXISTS tblPath(
     id_path     INTEGER PRIMARY KEY NOT NULL,
-    path        TEXT NOT NULL
+    path        TEXT NOT NULL,
+    UNIQUE (path) ON CONFLICT IGNORE
     );
 
     CREATE TABLE IF NOT EXISTS tblBanish(
