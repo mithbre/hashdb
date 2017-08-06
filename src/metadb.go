@@ -32,7 +32,15 @@ func DBInit(path string) (*sql.DB, error) {
     CREATE TABLE IF NOT EXISTS tblPath(
     id_path     INTEGER PRIMARY KEY NOT NULL,
     path        TEXT NOT NULL,
-    UNIQUE (path) ON CONFLICT IGNORE
+    alias       INTEGER REFERENCES tblAlias(id_alias) ON UPDATE CASCADE,
+    UNIQUE (path, alias) ON CONFLICT IGNORE
+    );
+
+    CREATE TABLE IF NOT EXISTS tblAlias(
+    id_alias    INTEGER PRIMARY KEY NOT NULL,
+    alias       TEXT NOT NULL,
+    root        TEXT NOT NULL,
+    UNIQUE (alias) ON CONFLICT IGNORE
     );
 
     CREATE TABLE IF NOT EXISTS tblBanish(
@@ -59,20 +67,20 @@ func DBInit(path string) (*sql.DB, error) {
     return db, nil
 }
 
-func InsPath(db *sql.DB, path string) (*sql.DB, int64, error) {
+func InsPath(db *sql.DB, path string, aliasID int64) (*sql.DB, int64, error) {
     /* Inserts path, and returns row ID */
     var row string
     var id int64
 
     // id is used in lieu of row (int vs str)
-    err := db.QueryRow("SELECT id_path FROM tblPath WHERE path = ?",
-        path).Scan(&row)
+    err := db.QueryRow("SELECT id_path FROM tblPath WHERE path = ? and alias = ?",
+        path, aliasID).Scan(&row)
 
     switch {
     case err == sql.ErrNoRows:
         log.Printf("PATH INSERT: %s\n", path)
-        insert, _ := db.Prepare("INSERT INTO tblPath(path) VALUES(?)")
-        res, _ := insert.Exec(path)
+        insert, _ := db.Prepare("INSERT INTO tblPath(path, alias) VALUES(?,?)")
+        res, _ := insert.Exec(path, aliasID)
         id, _ = res.LastInsertId()
 
     case err != nil:
@@ -81,6 +89,31 @@ func InsPath(db *sql.DB, path string) (*sql.DB, int64, error) {
 
     default:
         log.Printf("Path Exists: %s\n", path)
+        id, err = strconv.ParseInt(row, 10, 64)
+    }
+
+    return db, id, nil
+}
+
+func InsAlias(db *sql.DB, alias string, root string) (*sql.DB, int64, error) {
+    var row string
+    var id int64
+    err := db.QueryRow("SELECT id_alias FROM tblAlias WHERE alias = ?",
+        alias).Scan(&row)
+
+    switch {
+    case err == sql.ErrNoRows:
+        log.Printf("ALIAS INSERT: %s\n", alias)
+        insert, _ := db.Prepare("INSERT INTO tblAlias(alias, root) VALUES(?, ?)")
+        res, _ := insert.Exec(alias, root)
+        id, _ = res.LastInsertId()
+
+    case err != nil:
+        log.Printf("%s\n", err)
+        os.Exit(4)
+
+    default:
+        log.Printf("Alias Exists: %s\n", alias)
         id, err = strconv.ParseInt(row, 10, 64)
     }
 

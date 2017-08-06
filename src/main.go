@@ -7,6 +7,7 @@ import (
     "fmt"
     "io"
     "os"
+    "strings"
     "path/filepath"
 )
 
@@ -77,7 +78,7 @@ func traverseDir(tree map[string] []os.FileInfo, path string) error {
 }
 
 
-func pathAdd(startPath string) {
+func pathAdd(startPath string, alias string) {
     dirMap := make(map[string] []os.FileInfo)
     rootDir := filepath.Clean(startPath)
     rootDir, _ = filepath.Abs(rootDir)
@@ -92,9 +93,18 @@ func pathAdd(startPath string) {
         os.Exit(1)
     }
 
+    db, aliasID, _ := InsAlias(db, alias, rootDir)
+
     buf := make([]byte, 1024*1024*50)
     for path, values := range dirMap {
-        db, pathId, _ := InsPath(db, path)
+        //strip rootDir from path
+        pathShort := strings.Replace(path[4:], rootDir, "", 1)
+
+        if len(pathShort) == 0 {
+            pathShort = `\`
+        }
+
+        db, pathID, _ := InsPath(db, pathShort, aliasID)
         tx, _ := db.Begin()
         for _, item := range values {
             sha1, sha2 := checksum(filepath.Join(path, item.Name()), buf)
@@ -119,7 +129,8 @@ func main() {
 
     switch args[0] {
     case "add":
-        pathAdd(args[1])
+        //path, alias
+        pathAdd(args[1], args[2])
     case "dupe":
         SelectDupes()
     case "rm":
