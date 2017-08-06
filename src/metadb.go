@@ -16,6 +16,8 @@ func DBInit(path string) (*sql.DB, error) {
     }
 
     create := `
+    PRAGMA journal_mode = MEMORY;
+
     CREATE TABLE IF NOT EXISTS tblFile(
     id_file     INTEGER PRIMARY KEY NOT NULL,
     filename    TEXT NOT NULL,
@@ -85,10 +87,10 @@ func InsPath(db *sql.DB, path string) (*sql.DB, int64, error) {
     return db, id, nil
 }
 
-func DBAppend(db *sql.DB, path int64, item os.FileInfo,
-    sha1 []byte, sha2 []byte) (*sql.DB, error) {
+func DBAppend(tx *sql.Tx, path int64, item os.FileInfo,
+    sha1 []byte, sha2 []byte) (*sql.Tx, error) {
     /* Inserts Name, Size, UnixTime, PathID */
-    insFile, err := db.Prepare(`
+    insFile, err := tx.Prepare(`
         INSERT INTO tblFile(filename, leng, path, modtime, sha1, sha256)
         VALUES(?, ?, ?, ?, ?, ?)`)
     if err != nil {
@@ -102,7 +104,7 @@ func DBAppend(db *sql.DB, path int64, item os.FileInfo,
         log.Printf("%s", err)
         os.Exit(1)
     }
-    return db, nil
+    return tx, nil
 }
 
 func RmFile(id string) (*sql.DB, error) {

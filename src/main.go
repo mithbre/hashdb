@@ -86,14 +86,16 @@ func pathAdd(path string) {
     buf := make([]byte, 1024*1024*50)
     for path, values := range dirMap {
         db, pathId, _ := InsPath(db, path)
+        tx, _ := db.Begin()
         for _, item := range values {
             sha1, sha2 := checksum(filepath.Join(path, item.Name()), buf)
-            db, err = DBAppend(db, pathId, item, sha1, sha2)
+            tx, err = DBAppend(tx, pathID, item, sha1, sha2)
 
-            if db == nil {
+            if tx == nil {
                 os.Exit(1)
             }
         }
+        tx.Commit()
     }
 }
 
