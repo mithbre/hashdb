@@ -69,7 +69,6 @@ func traverseDir(tree map[string] []os.FileInfo, path string) error {
         return nil
     }
 
-    path, _ = filepath.Abs(path)
     err := filepath.Walk(path, walk)
     if err != nil {
         os.Exit(1)
@@ -78,11 +77,12 @@ func traverseDir(tree map[string] []os.FileInfo, path string) error {
 }
 
 
-func pathAdd(path string) {
+func pathAdd(startPath string) {
     dirMap := make(map[string] []os.FileInfo)
-    walkDir := filepath.Clean(path)
+    rootDir := filepath.Clean(startPath)
+    rootDir, _ = filepath.Abs(rootDir)
 
-    err := traverseDir(dirMap, walkDir)
+    err := traverseDir(dirMap, rootDir)
     if err != nil {
         os.Exit(1)
     }
