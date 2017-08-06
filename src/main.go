@@ -23,6 +23,8 @@ func checksum(path string, buf []byte) ([]byte, []byte) {
     fi, err := os.Open(path)
     defer fi.Close()
     if err != nil {
+        fmt.Println("Failed to open given path.")
+        fmt.Println(err)
         os.Exit(1)
     }
 
@@ -34,6 +36,8 @@ func checksum(path string, buf []byte) ([]byte, []byte) {
         if err == io.EOF {
             break
         } else if err != nil {
+            fmt.Println("Read fail during buffering.")
+            fmt.Println(err)
             os.Exit(1)
         }
 
@@ -47,6 +51,11 @@ func checksum(path string, buf []byte) ([]byte, []byte) {
 
 func traverseDir(tree map[string] []os.FileInfo, path string) error {
     walk := func(path string, meta os.FileInfo, err error) error {
+        if meta == nil {
+            fmt.Printf("File or path is unreadable.\n")
+            fmt.Println(err)
+            fmt.Printf(path)
+        }
 
         if meta.IsDir() {
             // filepath.SkipDir
