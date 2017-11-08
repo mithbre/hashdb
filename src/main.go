@@ -133,6 +133,8 @@ func main() {
         pathAdd(args[1], args[2])
     case "dupe":
         SelectDupes()
+    case "comp":
+        CompareAliases(args[1], args[2])
     case "rm":
         RmFile(args[1])
     case "banish":
