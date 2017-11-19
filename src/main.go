@@ -49,9 +49,15 @@ func traverseDir(tree map[string] []os.FileInfo, path string) error {
     walk := func(path string, meta os.FileInfo, err error) error {
 
         if meta.IsDir() {
-            // filepath.SkipDir
+            if meta.Mode() & os.ModeSymlink != 0 {
+                fmt.Println("Special Directory. Skipping ->", path)
+                return filepath.SkipDir
+            }
             path = filepath.Clean(path)
             tree[path] = make([]os.FileInfo, 0)
+        } else if !meta.Mode().IsRegular() {
+            fmt.Println("Special file. Skipping ->", path)
+            return nil
         } else {
             path, _ = filepath.Split(path)
             path = filepath.Clean(path)
