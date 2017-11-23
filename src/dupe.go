@@ -62,55 +62,59 @@ func CompareAliases(leftAlias string, rightAlias string) {
         os.Exit(1)
     }
 
-    var leftPath string
-    var leftPathID string
+    // struct at some point
+    var leftFn, leftPath string
+    var sha1, sha256 []byte
 
     // query all paths from leftAlias
-    resLPath, err := db.Query(
-       `Select id_path, path
-        FROM tblPath
-        JOIN tblAlias
-        ON tblPath.alias = tblAlias.id_alias
-        WHERE tblAlias.alias = ?
-        ORDER BY path ASC`, leftAlias)
+    resLeft, err := db.Query(
+        `SELECT filename, tblPath.path, sha1, sha256
+         FROM tblFile
+         JOIN tblAlias ON tblPath.alias = tblAlias.id_alias
+         JOIN tblPath ON tblFile.path = tblPath.id_path
+         WHERE tblAlias.alias = ?
+         ORDER BY tblPath.path, filename ASC`, leftAlias)
 
     if err != nil {
         fmt.Println(err)
         os.Exit(1)
     }
-    defer resLPath.Close()
+    defer resLeft.Close()
 
-    for resLPath.Next() {
-        err := resLPath.Scan(&leftPathID, &leftPath)
+    equal, err := db.Prepare(
+        `SELECT filename
+         FROM tblFile
+         JOIN tblAlias ON tblPath.alias = tblAlias.id_alias
+         JOIN tblPath ON tblFile.path = tblPath.id_path
+         WHERE tblAlias.alias = ?
+         AND tblPath.path = ?
+         AND sha1 = ?
+         AND sha256 = ?`)
+
+    if err != nil {
+        fmt.Println(err)
+        os.Exit(1)
+    }
+    defer equal.Close()
+
+    var prevLPath string
+    for resLeft.Next() {
+        err := resLeft.Scan(&leftFn, &leftPath, &sha1, &sha256)
         if err != nil {
             fmt.Println(err)
         }
 
-        // Query for this path in rightAlias, return the id_path
-        var rightPath string
-        err = db.QueryRow(
-            `SELECT id_path
-             FROM tblPath
-             JOIN tblAlias
-             ON tblPath.alias = tblAlias.id_alias
-             WHERE tblAlias.alias = ?
-             AND tblPath.path = ?`, rightAlias, leftPath).Scan(&rightPath)
-
-        if err == sql.ErrNoRows {
-            fmt.Println("[< PATH]", leftPath)
-            continue
-        } else if err != nil {
-            fmt.Println(err)
-            os.Exit(1)
+        if prevLPath == "" {
+            prevLPath = leftPath
+        } else if leftPath == prevLPath {
+            //store files
+        } else {
+            //print files
+            fmt.Println("\nPath:", leftPath)
+            prevLPath = leftPath
         }
 
-        fmt.Println("Path:", leftPath)
-
-        // Retrieve all the files in the current leftPath
-        res, err := db.Query(
-            `SELECT filename, sha1, sha256
-             FROM tblFile
-             WHERE path = ?`, leftPathID)
+        res, err := equal.Query(rightAlias, leftPath, sha1, sha256)
 
         if err != nil {
             fmt.Println(err)
@@ -118,56 +122,24 @@ func CompareAliases(leftAlias string, rightAlias string) {
         }
         defer res.Close()
 
-        var leftFile string
-        var sha1, sha256 []byte
-        // Change this to a struct at some point.
-
+        var rightFn string
+        count := 0
         for res.Next() {
-            err := res.Scan(&leftFile, &sha1, &sha256)
+            count++
+            err := res.Scan(&rightFn)
             if err != nil {
                 fmt.Println(err)
             }
 
-            // Retrieve filename from rightPath for leftFile matches
-            rightFile, err := db.Query(
-                `SELECT filename
-                 FROM tblFile
-                 WHERE path = ?
-                 AND sha1 = ?
-                 AND sha256 = ?`, rightPath, sha1, sha256)
-
-            //fmt.Println(leftFile)
-            if err != nil {
-                fmt.Println(err)
-                os.Exit(1)
+            if leftFn == rightFn {
+                fmt.Println("[= FILE]", leftFn)
+            } else {
+                fmt.Println("[! NAME]", leftFn, rightFn)
             }
+        }
 
-            defer rightFile.Close()
-
-            var rightFn string
-            count := 0
-            for rightFile.Next() {
-                count++
-                err := rightFile.Scan(&rightFn)
-                if err != nil {
-                    fmt.Println(err)
-                    os.Exit(1)
-                }
-
-                if leftFile == rightFn {
-                    fmt.Println("[= FILE]", leftFile)
-                } else {
-                    fmt.Println("[! NAME]", leftFile, rightFn)
-                }
-            }
-
-            if count == 0 {
-                fmt.Println("[< FILE]", leftFile)
-            }
-
-            if rightFile.Err() != nil {
-                fmt.Println(rightFile.Err())
-            }
+        if count == 0 {
+            fmt.Println("[< FILE]", leftFn)
         }
     }
 }
